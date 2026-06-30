@@ -27,7 +27,6 @@ data class BottomNavItem(
 )
 
 val bottomNavItems = listOf(
-    BottomNavItem(Screen.Home, "日历", Icons.Filled.CalendarMonth, Icons.Outlined.CalendarMonth),
     BottomNavItem(Screen.Countdown, "倒数日", Icons.Filled.Timer, Icons.Outlined.Timer),
     BottomNavItem(Screen.Health, "健康", Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder),
     BottomNavItem(Screen.Profile, "我的", Icons.Filled.Person, Icons.Outlined.Person)

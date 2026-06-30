@@ -34,7 +34,6 @@ import com.timecalendar.app.ui.components.ColorSpectrumPicker
 import com.timecalendar.app.ui.components.WheelDatePicker
 import com.timecalendar.app.ui.theme.CategoryColors
 import com.timecalendar.app.util.DateUtils
-import com.timecalendar.app.util.SystemCalendarHelper
 import com.timecalendar.app.viewmodel.CountdownViewModel
 
 @Composable
@@ -44,7 +43,7 @@ fun AddCountdownScreen(
     onBack: () -> Unit,
     onSaved: () -> Unit
 ) {
-    var currentStep by remember { mutableIntStateOf(0) } // 0=模板选择, 1=详细设置
+    var currentStep by remember { mutableIntStateOf(0) }
     var title by remember { mutableStateOf("") }
     var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000) }
     var isCountdown by remember { mutableStateOf(true) }
@@ -56,13 +55,10 @@ fun AddCountdownScreen(
     var note by remember { mutableStateOf("") }
     var isEditing by remember { mutableStateOf(false) }
     var showWheelDatePicker by remember { mutableStateOf(false) }
-    var showColorPicker by remember { mutableStateOf(false) }
-    var remindBefore by remember { mutableIntStateOf(0) } // 0=不提醒, 1=1天前, 3=3天前, 7=7天前
-    var syncToSystemCalendar by remember { mutableStateOf(false) }
+    var remindBefore by remember { mutableIntStateOf(0) }
 
     val allCategories = listOf("生日", "恋爱", "学习", "工作", "生活", "健康", "节日", "还款", "其他")
 
-    // Load existing event if editing
     LaunchedEffect(eventId) {
         if (eventId > 0) {
             viewModel.getEventById(eventId)?.let { event ->
@@ -75,6 +71,7 @@ fun AddCountdownScreen(
                 useLunar = event.useLunar
                 isRepeatYearly = event.isRepeatYearly
                 note = event.note
+                remindBefore = event.remindBefore
                 isEditing = true
                 currentStep = 1
             }
@@ -88,9 +85,7 @@ fun AddCountdownScreen(
                 navigationIcon = {
                     IconButton(onClick = {
                         if (currentStep > 0 && !isEditing) currentStep-- else onBack()
-                    }) {
-                        Icon(Icons.Filled.ArrowBack, "返回")
-                    }
+                    }) { Icon(Icons.Filled.ArrowBack, "返回") }
                 },
                 actions = {
                     if (currentStep == 1) {
@@ -108,11 +103,11 @@ fun AddCountdownScreen(
                                         isPinned = isPinned,
                                         useLunar = useLunar,
                                         isRepeatYearly = isRepeatYearly,
-                                        note = note.trim()
+                                        note = note.trim(),
+                                        remindBefore = remindBefore
                                     )
                                     if (isEditing) viewModel.updateEvent(event) else viewModel.addEvent(event)
 
-                                    // Schedule reminder
                                     if (remindBefore > 0) {
                                         val effectiveDate = DateUtils.getEffectiveTargetDate(selectedDate, isRepeatYearly)
                                         val remindTime = ReminderManager.calcRemindTime(effectiveDate, remindBefore)
@@ -126,23 +121,11 @@ fun AddCountdownScreen(
                                             )
                                         }
                                     }
-
-                                    // Sync to system calendar
-                                    if (syncToSystemCalendar) {
-                                        SystemCalendarHelper.addEventToSystemCalendar(
-                                            context = com.timecalendar.app.TimeCalendarApp.instance,
-                                            title = title.trim(),
-                                            startMillis = selectedDate
-                                        )
-                                    }
-
                                     onSaved()
                                 }
                             },
                             enabled = title.isNotBlank()
-                        ) {
-                            Text("保存", fontWeight = FontWeight.Bold)
-                        }
+                        ) { Text("保存", fontWeight = FontWeight.Bold) }
                     }
                 }
             )
@@ -157,46 +140,26 @@ fun AddCountdownScreen(
                     isRepeatYearly = template.isRepeatYearly
                     useLunar = template.useLunar
                     isCountdown = template.isCountdown
-                    note = template.note
-                    selectedColor = try {
-                        Color(android.graphics.Color.parseColor(template.bgColor))
-                    } catch (_: Exception) { Color(0xFFFF6B9D) }
+                    selectedColor = try { Color(android.graphics.Color.parseColor(template.bgColor)) } catch (_: Exception) { Color(0xFFFF6B9D) }
                     currentStep = 1
                 },
-                onBlankSelected = {
-                    currentStep = 1
-                }
+                onBlankSelected = { currentStep = 1 }
             )
 
             1 -> DetailSettingsScreen(
                 modifier = Modifier.padding(padding),
-                title = title,
-                onTitleChange = { title = it },
-                selectedDate = selectedDate,
-                onDateChange = { selectedDate = it },
-                isCountdown = isCountdown,
-                onModeChange = { isCountdown = it },
-                selectedCategory = selectedCategory,
-                onCategoryChange = { selectedCategory = it },
+                title = title, onTitleChange = { title = it },
+                selectedDate = selectedDate, onDateChange = { selectedDate = it },
+                isCountdown = isCountdown, onModeChange = { isCountdown = it },
+                selectedCategory = selectedCategory, onCategoryChange = { selectedCategory = it },
                 allCategories = allCategories,
-                selectedColor = selectedColor,
-                onColorChange = { selectedColor = it },
-                showColorPicker = showColorPicker,
-                onShowColorPickerChange = { showColorPicker = it },
-                isPinned = isPinned,
-                onPinnedChange = { isPinned = it },
-                useLunar = useLunar,
-                onLunarChange = { useLunar = it },
-                isRepeatYearly = isRepeatYearly,
-                onRepeatChange = { isRepeatYearly = it },
-                note = note,
-                onNoteChange = { note = it },
-                showWheelDatePicker = showWheelDatePicker,
-                onShowWheelDatePickerChange = { showWheelDatePicker = it },
-                remindBefore = remindBefore,
-                onRemindBeforeChange = { remindBefore = it },
-                syncToSystemCalendar = syncToSystemCalendar,
-                onSyncChange = { syncToSystemCalendar = it }
+                selectedColor = selectedColor, onColorChange = { selectedColor = it },
+                isPinned = isPinned, onPinnedChange = { isPinned = it },
+                useLunar = useLunar, onLunarChange = { useLunar = it },
+                isRepeatYearly = isRepeatYearly, onRepeatChange = { isRepeatYearly = it },
+                note = note, onNoteChange = { note = it },
+                showWheelDatePicker = showWheelDatePicker, onShowWheelDatePickerChange = { showWheelDatePicker = it },
+                remindBefore = remindBefore, onRemindBeforeChange = { remindBefore = it }
             )
         }
     }
@@ -208,25 +171,19 @@ private fun TemplateSelectionScreen(
     onTemplateSelected: (CountdownTemplate) -> Unit,
     onBlankSelected: () -> Unit
 ) {
-    var selectedCategory by remember { mutableStateOf<String?>(null) }
-    val categories = CountdownTemplates.categories
-
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Blank option
         item {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onBlankSelected() },
-                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth().clickable { onBlankSelected() },
+                shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(20.dp),
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
@@ -237,85 +194,37 @@ private fun TemplateSelectionScreen(
             }
         }
 
-        // Category filter
         item {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                item {
-                    FilterChip(
-                        selected = selectedCategory == null,
-                        onClick = { selectedCategory = null },
-                        label = { Text("全部") }
-                    )
-                }
-                items(categories) { cat ->
-                    FilterChip(
-                        selected = selectedCategory == cat,
-                        onClick = { selectedCategory = cat },
-                        label = { Text(cat) }
-                    )
-                }
-            }
-        }
-
-        // Template grid
-        val filtered = if (selectedCategory != null) {
-            CountdownTemplates.getByCategory(selectedCategory!!)
-        } else {
-            CountdownTemplates.templates
+            Text("常用模板", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 4.dp))
         }
 
         item {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
-                modifier = Modifier.height(((filtered.size + 1) / 2 * 100).dp),
+                modifier = Modifier.height(((CountdownTemplates.templates.size + 1) / 2 * 72).dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 userScrollEnabled = false
             ) {
-                items(filtered) { template ->
-                    TemplateCard(
-                        template = template,
-                        onClick = { onTemplateSelected(template) }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TemplateCard(template: CountdownTemplate, onClick: () -> Unit) {
-    val color = try {
-        Color(android.graphics.Color.parseColor(template.bgColor))
-    } catch (_: Exception) { MaterialTheme.colorScheme.primary }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(80.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                template.title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = color
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                if (template.isRepeatYearly) {
-                    Text("每年", fontSize = 10.sp, color = color.copy(alpha = 0.6f))
-                }
-                if (template.useLunar) {
-                    Text("农历", fontSize = 10.sp, color = color.copy(alpha = 0.6f))
+                items(CountdownTemplates.templates) { template ->
+                    val color = try { Color(android.graphics.Color.parseColor(template.bgColor)) } catch (_: Exception) { MaterialTheme.colorScheme.primary }
+                    Card(
+                        modifier = Modifier.fillMaxWidth().height(60.dp).clickable { onTemplateSelected(template) },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(12.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(template.title, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = color)
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                if (template.isRepeatYearly) Text("每年", fontSize = 9.sp, color = color.copy(alpha = 0.5f))
+                                if (template.useLunar) Text("农历", fontSize = 9.sp, color = color.copy(alpha = 0.5f))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -331,38 +240,51 @@ private fun DetailSettingsScreen(
     selectedCategory: String, onCategoryChange: (String) -> Unit,
     allCategories: List<String>,
     selectedColor: Color, onColorChange: (Color) -> Unit,
-    showColorPicker: Boolean, onShowColorPickerChange: (Boolean) -> Unit,
     isPinned: Boolean, onPinnedChange: (Boolean) -> Unit,
     useLunar: Boolean, onLunarChange: (Boolean) -> Unit,
     isRepeatYearly: Boolean, onRepeatChange: (Boolean) -> Unit,
     note: String, onNoteChange: (String) -> Unit,
     showWheelDatePicker: Boolean, onShowWheelDatePickerChange: (Boolean) -> Unit,
-    remindBefore: Int, onRemindBeforeChange: (Int) -> Unit,
-    syncToSystemCalendar: Boolean, onSyncChange: (Boolean) -> Unit
+    remindBefore: Int, onRemindBeforeChange: (Int) -> Unit
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Title
         item {
             OutlinedTextField(
-                value = title,
-                onValueChange = onTitleChange,
+                value = title, onValueChange = onTitleChange,
                 label = { Text("事件名称") },
                 placeholder = { Text("例如：生日、考试、旅行...") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
+                modifier = Modifier.fillMaxWidth(), singleLine = true,
                 leadingIcon = { Icon(Icons.Filled.Edit, null) }
             )
         }
 
-        // Date - wheel picker trigger
+        // 农历/公历 二选一
+        item {
+            Text("日期类型", style = MaterialTheme.typography.labelMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                FilterChip(
+                    selected = !useLunar, onClick = { onLunarChange(false) },
+                    label = { Text("公历") },
+                    leadingIcon = if (!useLunar) {{ Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }} else null,
+                    modifier = Modifier.weight(1f)
+                )
+                FilterChip(
+                    selected = useLunar, onClick = { onLunarChange(true) },
+                    label = { Text("农历") },
+                    leadingIcon = if (useLunar) {{ Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }} else null,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        // 日期选择
         item {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onShowWheelDatePickerChange(true) },
+                modifier = Modifier.fillMaxWidth().clickable { onShowWheelDatePickerChange(true) },
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Row(
@@ -371,19 +293,16 @@ private fun DetailSettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
-                        Text("目标日期", style = MaterialTheme.typography.labelMedium)
+                        Text(if (useLunar) "农历日期" else "公历日期", style = MaterialTheme.typography.labelMedium)
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             DateUtils.formatDisplay(selectedDate),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold
                         )
                         if (useLunar) {
                             val lunar = try {
                                 com.timecalendar.app.util.LunarCalendar.getLunarDateString(
-                                    DateUtils.getYear(selectedDate),
-                                    DateUtils.getMonth(selectedDate),
-                                    DateUtils.getDay(selectedDate)
+                                    DateUtils.getYear(selectedDate), DateUtils.getMonth(selectedDate), DateUtils.getDay(selectedDate)
                                 )
                             } catch (_: Exception) { "" }
                             if (lunar.isNotBlank()) {
@@ -396,30 +315,19 @@ private fun DetailSettingsScreen(
             }
         }
 
-        // Mode toggle
+        // 倒数/正数
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                FilterChip(
-                    selected = isCountdown,
-                    onClick = { onModeChange(true) },
-                    label = { Text("倒数") },
-                    leadingIcon = if (isCountdown) {{ Icon(Icons.Filled.Check, null, modifier = Modifier.size(18.dp)) }} else null,
-                    modifier = Modifier.weight(1f)
-                )
-                FilterChip(
-                    selected = !isCountdown,
-                    onClick = { onModeChange(false) },
-                    label = { Text("正数") },
-                    leadingIcon = if (!isCountdown) {{ Icon(Icons.Filled.Check, null, modifier = Modifier.size(18.dp)) }} else null,
-                    modifier = Modifier.weight(1f)
-                )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                FilterChip(selected = isCountdown, onClick = { onModeChange(true) }, label = { Text("倒数") },
+                    leadingIcon = if (isCountdown) {{ Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }} else null,
+                    modifier = Modifier.weight(1f))
+                FilterChip(selected = !isCountdown, onClick = { onModeChange(false) }, label = { Text("正数") },
+                    leadingIcon = if (!isCountdown) {{ Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }} else null,
+                    modifier = Modifier.weight(1f))
             }
         }
 
-        // Category
+        // 分类
         item {
             Text("分类", style = MaterialTheme.typography.labelMedium)
             Spacer(modifier = Modifier.height(8.dp))
@@ -427,112 +335,52 @@ private fun DetailSettingsScreen(
                 items(allCategories) { category ->
                     val color = CategoryColors[category] ?: Color.Gray
                     FilterChip(
-                        selected = selectedCategory == category,
-                        onClick = { onCategoryChange(category) },
+                        selected = selectedCategory == category, onClick = { onCategoryChange(category) },
                         label = { Text(category) },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = color.copy(alpha = 0.15f),
-                            selectedLabelColor = color
+                            selectedContainerColor = color.copy(alpha = 0.15f), selectedLabelColor = color
                         )
                     )
                 }
             }
         }
 
-        // Color - spectrum picker
+        // 颜色 - 直接光谱选色
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("颜色", style = MaterialTheme.typography.labelMedium)
-                TextButton(onClick = { onShowColorPickerChange(!showColorPicker) }) {
-                    Text(if (showColorPicker) "收起" else "自定义颜色")
-                }
-            }
-
-            if (showColorPicker) {
-                ColorSpectrumPicker(
-                    initialColor = selectedColor,
-                    onColorSelected = { onColorChange(it) }
-                )
-            } else {
-                // Quick color grid
-                val presetColors = listOf(
-                    Color(0xFFFF6B9D), Color(0xFFE91E63), Color(0xFFF44336), Color(0xFFFF5722),
-                    Color(0xFFFF9800), Color(0xFFFFC107), Color(0xFF4CAF50), Color(0xFF009688),
-                    Color(0xFF00BCD4), Color(0xFF2196F3), Color(0xFF3F51B5), Color(0xFF9C27B0),
-                    Color(0xFF607D8B), Color(0xFF795548), Color(0xFFE040FB), Color(0xFF000000)
-                )
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(8),
-                    modifier = Modifier.height(60.dp),
-                    userScrollEnabled = false
-                ) {
-                    items(presetColors) { color ->
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .padding(2.dp)
-                                .clip(CircleShape)
-                                .background(color)
-                                .then(
-                                    if (selectedColor == color) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                                    else Modifier
-                                )
-                                .clickable { onColorChange(color) }
-                        )
-                    }
-                }
-            }
+            Text("颜色", style = MaterialTheme.typography.labelMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            ColorSpectrumPicker(
+                initialColor = selectedColor,
+                onColorSelected = { onColorChange(it) }
+            )
         }
 
-        // Options
+        // 选项
         item {
             Text("选项", style = MaterialTheme.typography.labelMedium)
             Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    selected = isPinned,
-                    onClick = { onPinnedChange(!isPinned) },
-                    label = { Text("置顶") },
-                    leadingIcon = if (isPinned) {{ Icon(Icons.Filled.Check, null, modifier = Modifier.size(18.dp)) }} else null,
-                    modifier = Modifier.weight(1f)
-                )
-                FilterChip(
-                    selected = useLunar,
-                    onClick = { onLunarChange(!useLunar) },
-                    label = { Text("农历") },
-                    leadingIcon = if (useLunar) {{ Icon(Icons.Filled.Check, null, modifier = Modifier.size(18.dp)) }} else null,
-                    modifier = Modifier.weight(1f)
-                )
-                FilterChip(
-                    selected = isRepeatYearly,
-                    onClick = { onRepeatChange(!isRepeatYearly) },
-                    label = { Text("每年重复") },
-                    leadingIcon = if (isRepeatYearly) {{ Icon(Icons.Filled.Check, null, modifier = Modifier.size(18.dp)) }} else null,
-                    modifier = Modifier.weight(1f)
-                )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(selected = isPinned, onClick = { onPinnedChange(!isPinned) }, label = { Text("置顶") },
+                    leadingIcon = if (isPinned) {{ Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }} else null,
+                    modifier = Modifier.weight(1f))
+                FilterChip(selected = isRepeatYearly, onClick = { onRepeatChange(!isRepeatYearly) }, label = { Text("每年重复") },
+                    leadingIcon = if (isRepeatYearly) {{ Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }} else null,
+                    modifier = Modifier.weight(1f))
             }
         }
 
-        // Reminder
+        // 提醒
         item {
             Text("提醒", style = MaterialTheme.typography.labelMedium)
             Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                listOf(0 to "不提醒", 1 to "当天", 3 to "3天前", 7 to "7天前").forEach { (value, label) ->
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(0 to "不提醒", 0 to "当天", 1 to "提前1天", 3 to "提前3天", 7 to "提前7天").forEachIndexed { index, (value, _) ->
+                    val actualValue = when (index) { 0 -> 0; 1 -> 0; 2 -> 1; 3 -> 3; 4 -> 7; else -> 0 }
+                    val label = when (index) { 0 -> "不提醒"; 1 -> "当天"; 2 -> "提前1天"; 3 -> "提前3天"; 4 -> "提前7天"; else -> "" }
                     FilterChip(
-                        selected = remindBefore == value,
-                        onClick = { onRemindBeforeChange(value) },
-                        label = { Text(label) },
+                        selected = remindBefore == actualValue,
+                        onClick = { onRemindBeforeChange(actualValue) },
+                        label = { Text(label, fontSize = 11.sp) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                             selectedLabelColor = MaterialTheme.colorScheme.primary
@@ -542,45 +390,24 @@ private fun DetailSettingsScreen(
             }
         }
 
-        // Sync to system calendar
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text("同步到系统日历", style = MaterialTheme.typography.bodyMedium)
-                    Text("在手机日历中显示此事件", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Switch(
-                    checked = syncToSystemCalendar,
-                    onCheckedChange = { onSyncChange(it) }
-                )
-            }
-        }
-
-        // Note
+        // 备注
         item {
             OutlinedTextField(
-                value = note,
-                onValueChange = onNoteChange,
+                value = note, onValueChange = onNoteChange,
                 label = { Text("备注") },
                 placeholder = { Text("可选，添加备注信息...") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 2,
-                maxLines = 4
+                modifier = Modifier.fillMaxWidth(), minLines = 2, maxLines = 4
             )
         }
 
         item { Spacer(modifier = Modifier.height(32.dp)) }
     }
 
-    // Wheel Date Picker Dialog
+    // 滚轮日期选择
     if (showWheelDatePicker) {
         AlertDialog(
             onDismissRequest = { onShowWheelDatePickerChange(false) },
-            title = { Text("选择日期") },
+            title = { Text(if (useLunar) "选择农历日期" else "选择公历日期") },
             text = {
                 WheelDatePicker(
                     initialYear = DateUtils.getYear(selectedDate),
@@ -596,16 +423,8 @@ private fun DetailSettingsScreen(
                     }
                 )
             },
-            confirmButton = {
-                TextButton(onClick = { onShowWheelDatePickerChange(false) }) {
-                    Text("确定")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { onShowWheelDatePickerChange(false) }) {
-                    Text("取消")
-                }
-            }
+            confirmButton = { TextButton(onClick = { onShowWheelDatePickerChange(false) }) { Text("确定") } },
+            dismissButton = { TextButton(onClick = { onShowWheelDatePickerChange(false) }) { Text("取消") } }
         )
     }
 }

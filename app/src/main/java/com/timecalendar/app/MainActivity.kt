@@ -49,7 +49,6 @@ fun TimeCalendarMainScreen() {
 
     // Screens that show bottom bar
     val showBottomBar = currentDestination?.route in listOf(
-        Screen.Home.route,
         Screen.Countdown.route,
         Screen.Health.route,
         Screen.Profile.route
@@ -90,7 +89,7 @@ fun TimeCalendarMainScreen() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = Screen.Countdown.route,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
