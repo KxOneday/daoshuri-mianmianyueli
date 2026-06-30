@@ -20,6 +20,8 @@ data class CountdownEvent(
     val isRepeatMonthly: Boolean = false,
     val useLunar: Boolean = false,
     val note: String = "",
+    val remindBefore: Int = 0, // 0=不提醒, 1=当天, 3=3天前, 7=7天前
+    val syncToSystemCalendar: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )

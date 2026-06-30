@@ -26,6 +26,7 @@ import com.timecalendar.app.data.local.entity.CountdownEvent
 import com.timecalendar.app.ui.theme.*
 import com.timecalendar.app.util.DateUtils
 import com.timecalendar.app.util.LunarCalendar
+import com.timecalendar.app.util.SystemCalendarHelper
 import com.timecalendar.app.viewmodel.CountdownViewModel
 import java.util.Calendar
 
@@ -276,6 +277,7 @@ private fun SelectedDateDetails(
     dateMillis: Long,
     events: List<CountdownEvent>
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val lunarInfo = try {
         val y = DateUtils.getYear(dateMillis)
         val m = DateUtils.getMonth(dateMillis)
@@ -283,6 +285,11 @@ private fun SelectedDateDetails(
         LunarCalendar.solarToLunar(y, m, d)
     } catch (e: Exception) {
         null
+    }
+
+    // System calendar events
+    val systemEvents = remember(dateMillis) {
+        try { SystemCalendarHelper.getEventsForDate(context, dateMillis) } catch (_: Exception) { emptyList() }
     }
 
     Card(
@@ -313,10 +320,14 @@ private fun SelectedDateDetails(
                     }
                 }
                 if (DateUtils.isToday(dateMillis)) {
-                    SuggestionChip(
-                        onClick = {},
-                        label = { Text("今天", fontSize = 11.sp) }
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text("今天", fontSize = 11.sp, color = MaterialTheme.colorScheme.primary)
+                    }
                 }
             }
 
@@ -326,7 +337,44 @@ private fun SelectedDateDetails(
                     EventChip(event)
                     Spacer(modifier = Modifier.height(4.dp))
                 }
-            } else {
+            }
+
+            // System calendar events
+            if (systemEvents.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "📅 系统日历",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                systemEvents.take(5).forEach { sysEvent ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f))
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(Color(sysEvent.color))
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            sysEvent.title,
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
+            }
+
+            if (events.isEmpty() && systemEvents.isEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "这一天没有事件",

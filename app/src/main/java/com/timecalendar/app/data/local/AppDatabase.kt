@@ -13,7 +13,7 @@ import com.timecalendar.app.data.local.entity.PeriodRecord
 
 @Database(
     entities = [CountdownEvent::class, PeriodRecord::class, HabitRecord::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -31,7 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "timecalendar_db"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }
