@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="seed">#FF6B9D</color>
+    <color name="primary">#FF6B9D</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="primary_container">#FFE0E6</color>
+    <color name="on_primary_container">#3E0021</color>
+    <color name="secondary">#74565F</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="background">#FFFBFF</color>
+    <color name="on_background">#201A1C</color>
+    <color name="surface">#FFFBFF</color>
+    <color name="on_surface">#201A1C</color>
+    <color name="error">#BA1A1A</color>
+
+    <!-- Period colors -->
+    <color name="period_red">#FF6B6B</color>
+    <color name="period_light">#FFB3B3</color>
+    <color name="ovulation_green">#4CAF50</color>
+    <color name="fertile_yellow">#FFC107</color>
+    <color name="safe_blue">#42A5F5</color>
+
+    <!-- Countdown colors -->
+    <color name="countdown_blue">#2196F3</color>
+    <color name="countdown_orange">#FF9800</color>
+    <color name="countdown_purple">#9C27B0</color>
+    <color name="countdown_teal">#009688</color>
+</resources>

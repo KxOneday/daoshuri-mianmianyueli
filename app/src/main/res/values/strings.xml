@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">时光历</string>
+    <string name="tab_calendar">日历</string>
+    <string name="tab_countdown">倒数日</string>
+    <string name="tab_health">健康</string>
+    <string name="tab_profile">我的</string>
+    <string name="add_countdown">添加倒数日</string>
+    <string name="add_event">添加事件</string>
+    <string name="countdown">倒数</string>
+    <string name="countup">正数</string>
+    <string name="days_left">还有 %d 天</string>
+    <string name="days_passed">已经 %d 天</string>
+    <string name="today">今天</string>
+    <string name="lunar_calendar">农历</string>
+    <string name="solar_calendar">公历</string>
+    <string name="category_work">工作</string>
+    <string name="category_life">生活</string>
+    <string name="category_health">健康</string>
+    <string name="category_study">学习</string>
+    <string name="category_festival">节日</string>
+    <string name="category_other">其他</string>
+    <string name="period_record">经期记录</string>
+    <string name="period_prediction">经期预测</string>
+    <string name="ovulation">排卵期</string>
+    <string name="fertile_window">易孕期</string>
+    <string name="symptom_tracking">症状追踪</string>
+    <string name="cycle_analysis">周期分析</string>
+    <string name="habit_tracking">习惯打卡</string>
+    <string name="settings">设置</string>
+    <string name="privacy_lock">隐私锁</string>
+    <string name="cloud_sync">云端同步</string>
+    <string name="theme">主题</string>
+    <string name="backup">备份</string>
+    <string name="about">关于</string>
+    <string name="save">保存</string>
+    <string name="cancel">取消</string>
+    <string name="delete">删除</string>
+    <string name="edit">编辑</string>
+    <string name="confirm_delete">确认删除？</string>
+    <string name="no_events">暂无事件</string>
+    <string name="date_calculator">日期计算器</string>
+    <string name="date_between">日期间隔</string>
+    <string name="date_after">N天后日期</string>
+    <string name="poster_share">海报分享</string>
+</resources>
