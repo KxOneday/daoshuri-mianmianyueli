@@ -340,7 +340,8 @@ private fun SelectedDateDetails(
 
 @Composable
 private fun EventChip(event: CountdownEvent) {
-    val days = DateUtils.getDaysFromNow(event.targetDate)
+    val effectiveDate = DateUtils.getEffectiveTargetDate(event.targetDate, event.isRepeatYearly)
+    val days = DateUtils.getDaysFromNow(effectiveDate)
     val color = try {
         Color(android.graphics.Color.parseColor(event.bgColor))
     } catch (e: Exception) {

@@ -38,12 +38,18 @@ class TimeCalendarWidgetReceiver : AppWidgetProvider() {
                     val eventList = db.countdownEventDao().getAllVisible().firstOrNull()
 
                     if (eventList != null && eventList.isNotEmpty()) {
+                        val today = DateUtils.getTodayStart()
                         val nearest = eventList
-                            .filter { DateUtils.isFuture(it.targetDate) }
-                            .minByOrNull { it.targetDate }
-                            ?: eventList.first()
+                            .map { event ->
+                                val effectiveDate = DateUtils.getEffectiveTargetDate(event.targetDate, event.isRepeatYearly)
+                                event to effectiveDate
+                            }
+                            .filter { (_, effectiveDate) -> effectiveDate >= today }
+                            .minByOrNull { (_, effectiveDate) -> effectiveDate }
+                            ?.first ?: eventList.first()
 
-                        val days = DateUtils.getDaysFromNow(nearest.targetDate)
+                        val effectiveDate = DateUtils.getEffectiveTargetDate(nearest.targetDate, nearest.isRepeatYearly)
+                        val days = DateUtils.getDaysFromNow(effectiveDate)
                         views.setTextViewText(R.id.widget_event_name, nearest.title)
                         views.setTextViewText(R.id.widget_days, "还有 $days 天")
                     } else {

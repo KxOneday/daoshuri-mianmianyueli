@@ -108,6 +108,36 @@ object DateUtils {
         return cal.get(Calendar.DAY_OF_MONTH)
     }
 
+    /**
+     * 对于每年重复的事件，计算下一个发生日期。
+     * 如果今年的日期已过，返回明年的；否则返回今年的。
+     */
+    fun getNextYearlyOccurrence(targetDate: Long): Long {
+        val today = getTodayStart()
+        val targetCal = Calendar.getInstance().apply { timeInMillis = targetDate }
+        val todayCal = Calendar.getInstance().apply { timeInMillis = today }
+
+        val thisYear = todayCal.get(Calendar.YEAR)
+        val nextOccurrence = Calendar.getInstance().apply {
+            set(thisYear, targetCal.get(Calendar.MONTH), targetCal.get(Calendar.DAY_OF_MONTH), 0, 0, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        // 如果今年的日期已经过了，算明年
+        if (nextOccurrence.timeInMillis < today) {
+            nextOccurrence.set(Calendar.YEAR, thisYear + 1)
+        }
+
+        return nextOccurrence.timeInMillis
+    }
+
+    /**
+     * 获取倒数天数，自动处理每年重复事件
+     */
+    fun getEffectiveTargetDate(targetDate: Long, isRepeatYearly: Boolean): Long {
+        return if (isRepeatYearly) getNextYearlyOccurrence(targetDate) else targetDate
+    }
+
     fun daysUntilText(days: Int): String {
         return when {
             days == 0 -> "就是今天！"

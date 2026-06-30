@@ -159,8 +159,9 @@ private fun CountdownCard(
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val days = DateUtils.getDaysFromNow(event.targetDate)
-    val isFuture = DateUtils.isFuture(event.targetDate)
+    val effectiveDate = DateUtils.getEffectiveTargetDate(event.targetDate, event.isRepeatYearly)
+    val days = DateUtils.getDaysFromNow(effectiveDate)
+    val isFuture = DateUtils.isFuture(effectiveDate)
     val color = try {
         Color(android.graphics.Color.parseColor(event.bgColor))
     } catch (e: Exception) {
