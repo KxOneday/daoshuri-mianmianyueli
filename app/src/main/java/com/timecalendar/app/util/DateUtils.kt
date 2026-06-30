@@ -138,13 +138,23 @@ object DateUtils {
         return if (isRepeatYearly) getNextYearlyOccurrence(targetDate) else targetDate
     }
 
-    fun daysUntilText(days: Int): String {
-        return when {
-            days == 0 -> "就是今天！"
-            days == 1 -> "明天"
-            days == -1 -> "昨天"
-            days > 0 -> "还有 $days 天"
-            else -> "已过 ${-days} 天"
+    fun daysUntilText(days: Int, isCountdown: Boolean): String {
+        return if (isCountdown) {
+            // 倒数：显示还剩多少天
+            when {
+                days == 0 -> "就是今天！"
+                days == 1 -> "明天"
+                days == -1 -> "昨天"
+                days > 0 -> "还有 $days 天"
+                else -> "已过 ${-days} 天"
+            }
+        } else {
+            // 正数：显示已经过了多少天
+            when {
+                days == 0 -> "就是今天！"
+                days > 0 -> "已经 $days 天"
+                else -> "还有 ${-days} 天"
+            }
         }
     }
 }

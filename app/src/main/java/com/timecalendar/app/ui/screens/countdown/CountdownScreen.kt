@@ -213,7 +213,11 @@ private fun CountdownCard(
                     color = color
                 )
                 Text(
-                    text = if (isFuture) "天后" else "天前",
+                    text = if (event.isCountdown) {
+                        if (isFuture) "天后" else "天前"
+                    } else {
+                        "已经"
+                    },
                     fontSize = 12.sp,
                     color = color.copy(alpha = 0.7f)
                 )

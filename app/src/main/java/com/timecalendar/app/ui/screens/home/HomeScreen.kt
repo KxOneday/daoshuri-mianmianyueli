@@ -412,7 +412,7 @@ private fun EventChip(event: CountdownEvent) {
             color = color
         )
         Text(
-            text = DateUtils.daysUntilText(days),
+            text = DateUtils.daysUntilText(days, event.isCountdown),
             style = MaterialTheme.typography.bodySmall,
             color = color.copy(alpha = 0.8f)
         )
