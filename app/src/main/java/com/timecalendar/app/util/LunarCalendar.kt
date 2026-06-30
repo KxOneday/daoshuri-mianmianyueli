@@ -55,7 +55,7 @@ object LunarCalendar {
     ) {
         override fun toString(): String {
             val leap = if (isLeapMonth) "闰" else ""
-            return "$yearGanZhi$shengXiao年 ${leap}$monthName$dayName"
+            return "$yearGanZhi${shengXiao}年 ${leap}$monthName$dayName"
         }
     }
 
@@ -85,7 +85,7 @@ object LunarCalendar {
 
     // Get days in a specific lunar month
     private fun monthDays(year: Int, month: Int): Int {
-        return if (LUNAR_INFO[year - 1901] and (0x10000 shr month) != 0L) 30 else 29
+        return if (LUNAR_INFO[year - 1901] and (0x10000 shr month).toLong() != 0L) 30 else 29
     }
 
     // Convert solar date to lunar date

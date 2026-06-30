@@ -238,18 +238,24 @@ private fun CountdownCard(
                 ) {
                     CategoryBadge(event.category)
                     if (event.isRepeatYearly) {
-                        SuggestionChip(
-                            onClick = {},
-                            label = { Text("每年", fontSize = 10.sp) },
-                            modifier = Modifier.height(24.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text("每年", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                        }
                     }
                     if (event.useLunar) {
-                        SuggestionChip(
-                            onClick = {},
-                            label = { Text("农历", fontSize = 10.sp) },
-                            modifier = Modifier.height(24.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text("农历", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                        }
                     }
                 }
             }

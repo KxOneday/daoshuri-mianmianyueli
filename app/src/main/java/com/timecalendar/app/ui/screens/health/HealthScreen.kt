@@ -149,7 +149,7 @@ private fun CycleStatusCard(
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
-                    progress = { (currentCycleDay?.toFloat() ?: 0f) / (averageCycle?.toFloat() ?: 28f) },
+                    progress = (currentCycleDay?.toFloat() ?: 0f) / (averageCycle?.toFloat() ?: 28f),
                     modifier = Modifier.fillMaxSize(),
                     strokeWidth = 12.dp,
                     color = PeriodRed,
