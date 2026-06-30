@@ -7,6 +7,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,8 +32,9 @@ jobs:
     - name: Build Debug APK
       run: ./gradlew assembleDebug
 
-    - name: Build Release APK (unsigned)
-      run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file=dummy -Pandroid.injected.signing.store.password=dummy -Pandroid.injected.signing.key.alias=dummy -Pandroid.injected.signing.key.password=dummy || ./gradlew assembleRelease || echo "Release build skipped (no signing config)"
+    - name: Build Release APK
+      run: ./gradlew assembleRelease
+      continue-on-error: true
 
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
@@ -39,32 +43,22 @@ jobs:
         path: app/build/outputs/apk/debug/*.apk
 
     - name: Upload Release APK
-      if: hashFiles('app/build/outputs/apk/release/*.apk') != ''
+      continue-on-error: true
       uses: actions/upload-artifact@v4
       with:
         name: timecalendar-release
         path: app/build/outputs/apk/release/*.apk
 
     - name: Create Release
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: softprops/action-gh-release@v1
+      if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ github.run_number }}
         name: 时光历 v${{ github.run_number }}
         files: app/build/outputs/apk/debug/*.apk
         body: |
-          ## 时光历 TimeCalendar v${{ github.run_number }}
-
-          > 记录时光流转的每一个日子
+          ## 时光历 TimeCalendar
 
           融合倒数日 + 经期管理的一站式日子记录 App。
-
-          ### ✨ 功能
-          - 📅 统一日历视图（公历+农历）
-          - ⏰ 倒数日/正数日管理
-          - 🩺 经期记录与智能预测
-          - 🎨 个性化主题
-          - 🔐 隐私保护
-          - 🛠 日期计算器
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
